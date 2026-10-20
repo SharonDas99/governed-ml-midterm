@@ -164,4 +164,4 @@ I completed this exam individually, using only the permitted materials.
 
 **Signature (type your name):** Sharon Das
 
-AI disclosure: I used Claude to assist with this exam, as permitted by Dr. Eslami by email on October 18 and as he announced in class on October 19.
+AI disclosure: I used Claude to assist with this exam. Dr. Eslami announced in class today, October 19, 2026, that GitHub is permitted.
