@@ -138,15 +138,23 @@ It is a preventive human-approval control on running code from a fork. Owner: th
 
 **7.2** After approval, what did Stage A print about your governance change? Quote it.
 
+Stage A (`ci/check_policy_integrity.py`) listed `governance/policy.json`, `src/gate.py` and `tests/test_lab5_gate.py` under "GOVERNANCE CHANGE DETECTED (routed to policy owner for review)", with "protections added: pii_columns gained ['date_of_birth', 'zip']; leakage_columns gained ['adjuster_fraud_review', 'renewal_offered']; new threshold min_fpr_ratio = 0.8", and ended: "Governance change is a tightening or an addition. Allowed, pending owner review. Integrity check passed." My change only tightened or added controls, so it was allowed but still routed to the policy owner.
+
 ---
 
 ## Lab 8 (bonus): Break it and watch it stop
 
 **8.1** What did you change on your second branch, and what did `python run_pipeline.py --config configs/v2.json` print locally?
 
+On `student/sharon-das-cheat` I set `min_approval_disparity_ratio`, `min_subgroup_tpr`, `min_tpr_ratio` and `min_fpr_ratio` to 0.50 and `min_subgroup_auc` to 0.55 in `governance/policy.json`. Locally, v2 then passed every check (rural AUC 0.5937 vs 0.55, rural TPR 0.5588 vs 0.50, disparity 0.5596 vs 0.50, TPR ratio 0.5888 vs 0.50, FPR ratio 0.5765 vs 0.50) and printed "DECISION: PASS. This model may proceed to deployment review." Nothing on my own machine stopped the biased model.
+
 **8.2** What did Stage A print on GitHub? Quote the refusal line.
 
+"REFUSED: this pull request LOOSENS governance:" followed by "min_subgroup_auc LOOSENED from 0.64 to 0.55", "min_subgroup_tpr LOOSENED from 0.7 to 0.5", "min_approval_disparity_ratio LOOSENED from 0.8 to 0.5", "min_tpr_ratio LOOSENED from 0.8 to 0.5", and "A model author may tighten a control or add one. Loosening needs the AI Risk Committee, in its own pull request." (min_fpr_ratio did not appear as loosened because it is a new key compared with main, so it was reported as an addition.)
+
 **8.3** Which control would NOT have stopped this change on its own, and why do we need both?
+
+The deployment gate (`src/gate.py`) would not have stopped it on its own: the gate reads its thresholds from the policy file, so if the author lowers the thresholds, the gate faithfully passes the biased v2 model. The integrity check in CI Stage A compares the policy with main and refuses any loosening, enforcing separation of duties so the person building the model cannot change the rules that judge it. We need both: the gate judges the model against the rules, and the integrity check protects the rules themselves; either one alone can be defeated.
 
 ---
 
